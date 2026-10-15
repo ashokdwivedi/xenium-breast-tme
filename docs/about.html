@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About this project — Xenium breast TME</title>
+<meta name="description" content="Why it was built, who built it, and how to get in touch.">
+<meta name="author" content="Ashok Dwivedi">
+<meta property="og:title" content="About this project">
+<meta property="og:description" content="Why it was built, who built it, and how to get in touch.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="masthead-title" href="index.html">Xenium breast TME</a>
+    <nav class="site-nav">
+        <a href="index.html">Overview</a>
+        <a href="qc.html">1 · Quality control</a>
+        <a href="celltypes.html">2 · Cell typing</a>
+        <a href="spatial.html">3 · Spatial structure</a>
+        <a href="methods.html">Methods</a>
+        <a href="about.html" class="current">About</a>
+        <a href="https://github.com/ashokdwivedi/xenium-breast-tme">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+<main>
+<p class="kicker">About</p>
+<h1>About this project</h1>
+<p class="lede">Why it was built, who built it, and how to get in touch.</p>
+
+<p>This project is a self-contained demonstration of how I approach spatial transcriptomics
+data: start from the public raw output rather than a processed object, make the quality criteria
+explicit before looking at the result, run the annotation twice by independent routes, and state
+plainly what the data cannot support.</p>
+
+<h2>Why these three stages</h2>
+
+<p>They are the stages where spatial analyses actually go wrong. QC on in situ data is
+unforgiving — a background rate or a segmentation artefact propagates silently through
+everything downstream, and by the time it surfaces it looks like biology. Cell typing on a
+targeted panel is a judgement call that a pipeline cannot make for you: the panel sets a hard
+ceiling on resolvable identity, and pretending otherwise produces confident labels on evidence
+that does not exist. And spatial statistics is where a weak null model turns tissue geometry
+into a false discovery; permuting labels while holding positions fixed is the minimum defensible
+choice, and it is not the default in most published analyses.</p>
+
+<h2>What is in the repository</h2>
+
+<ul>
+<li><code>src/xtme/</code> — a small library: readers, QC, annotation, spatial statistics
+and a shared figure style. Every statistical function is importable and tested.</li>
+<li><code>scripts/</code> — four numbered stages plus the download script. Each writes its
+tables and figures and nothing else.</li>
+<li><code>config/config.yaml</code> — every threshold and parameter in the analysis.</li>
+<li><code>tests/</code> — unit tests on synthetic fixtures with known answers, run in CI on
+every push without any data download.</li>
+<li><code>results/</code> — the figures and tables behind every claim on this site,
+committed so the repository is readable without running anything.</li>
+</ul>
+
+<h2>Reusing it</h2>
+
+<p>The pipeline is parameterised on the config file, so pointing it at a different Xenium run
+means editing paths and, if the tissue differs, swapping the marker sets in
+<code>src/xtme/annotate.py</code> and the reference in the config. The QC and spatial modules are
+tissue-agnostic.</p>
+
+<div class="note"><span class="label">Note</span><p>Everything here is MIT-licensed and reproducible from a clean clone:
+<a href="https://github.com/ashokdwivedi/xenium-breast-tme">github.com/ashokdwivedi/xenium-breast-tme</a>. Issues and corrections are welcome —
+if something in the statistics looks wrong to you, I would rather know.</p></div>
+
+<h2>Contact</h2>
+
+<p class="author-line">Ashok Dwivedi — <a href="https://ashokdwivedi.com">ashokdwivedi.com</a></p>
+<p>Background, other projects and contact details are on
+<a href="https://ashokdwivedi.com">ashokdwivedi.com</a>.</p>
+
+<div class="pager"><a href="methods.html"><span class="dir">Previous</span>Methods</a><span></span></div>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="author-line">Built by <a href="https://ashokdwivedi.com">Ashok Dwivedi</a> —
+       <a href="https://ashokdwivedi.com">ashokdwivedi.com</a></p>
+    <p>Source, data-download script and unit tests:
+       <a href="https://github.com/ashokdwivedi/xenium-breast-tme">github.com/ashokdwivedi/xenium-breast-tme</a>. Released under the MIT licence.</p>
+    <p>Data are public: 10x Genomics Xenium In Situ FFPE Human Breast Cancer (Janesick et al. 2023)
+       and the breast-cancer scRNA-seq atlas of Wu et al. 2021 (GEO GSE176078). This site is an
+       independent methods demonstration and is not affiliated with or endorsed by 10x Genomics.</p>
+  </div>
+</footer>
+</body>
+</html>

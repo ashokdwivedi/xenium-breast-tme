@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapping the tumour microenvironment in Xenium in situ data — Xenium breast TME</title>
+<meta name="description" content="A reproducible, tested pipeline from raw 10x Xenium output to spatial statistics on the tumour–immune interface.">
+<meta name="author" content="Ashok Dwivedi">
+<meta property="og:title" content="Mapping the tumour microenvironment in Xenium in situ data">
+<meta property="og:description" content="A reproducible, tested pipeline from raw 10x Xenium output to spatial statistics on the tumour–immune interface.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="masthead-title" href="index.html">Xenium breast TME</a>
+    <nav class="site-nav">
+        <a href="index.html" class="current">Overview</a>
+        <a href="qc.html">1 · Quality control</a>
+        <a href="celltypes.html">2 · Cell typing</a>
+        <a href="spatial.html">3 · Spatial structure</a>
+        <a href="methods.html">Methods</a>
+        <a href="about.html">About</a>
+        <a href="https://github.com/ashokdwivedi/xenium-breast-tme">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+<main>
+<p class="kicker">Overview</p>
+<h1>Mapping the tumour microenvironment in Xenium in situ data</h1>
+<p class="lede">A reproducible, tested pipeline from raw 10x Xenium output to spatial statistics on the tumour–immune interface.</p>
+
+<p>This is a complete, reproducible analysis of a public <b>10x Genomics Xenium In Situ</b>
+run on FFPE human breast cancer: two replicate sections of the same tumour block, taken from
+raw vendor output through quality control, cell typing against a single-cell reference, and
+spatial statistics on how the tumour and immune compartments are arranged relative to each
+other. Everything here — the code, the thresholds, the unit tests, the figures and the
+tables behind every number on this site — is in
+<a href="https://github.com/ashokdwivedi/xenium-breast-tme">the repository</a>, and the whole thing reruns from a clean clone with
+<code>bash scripts/download_data.sh &amp;&amp; make all</code>.</p>
+
+<div class="stats"><div class="stat"><span class="v">286,532</span><span class="k">segmented cells across two replicate sections</span></div><div class="stat"><span class="v">313</span><span class="k">panel genes (targeted, not whole-transcriptome)</span></div><div class="stat"><span class="v">97.6%</span><span class="k">cells passing QC in the stricter replicate</span></div><div class="stat"><span class="v">0.992</span><span class="k">cross-replicate pseudobulk correlation (r)</span></div><div class="stat"><span class="v">18</span><span class="k">transcriptional clusters typed against the reference</span></div><div class="stat"><span class="v">8</span><span class="k">recurrent spatial niches recovered</span></div></div>
+
+<h2>What the analysis shows</h2>
+
+<p>Three findings carry the story, and each is a link to the page that derives it.</p>
+
+<ol>
+<li><b>Both runs are technically sound, and the evidence is quantitative rather than
+    visual.</b> Negative-control probe rates are
+    0.038–0.088%
+    of panel signal, median depth is identical at
+    164 transcripts per cell in both sections, and
+    pseudobulk expression across the 313 panel genes correlates at
+    r&nbsp;=&nbsp;0.992 between replicates. The spatial
+    structure that <em>is</em> present in the QC metrics tracks tissue architecture, not
+    instrument geometry — which is the distinction that decides whether you filter cells
+    or re-run the slide. <a href="qc.html">See the QC page.</a></li>
+
+<li><b>Cell typing on a 313-gene panel is reliable for broad
+    lineages and honest about where it stops.</b> Label transfer from the Wu&nbsp;et&nbsp;al.
+    breast-cancer atlas assigns 97.8% of QC-passing cells above
+    a confidence floor, and an independent marker-scoring route agrees with it on
+    78% of clusters. The disagreements are reported,
+    not smoothed over. <a href="celltypes.html">See the cell-typing page.</a></li>
+
+<li><b>The tissue is compartmentalised, and the tumour boundary is selectively permeable.</b>
+    Against a label-permutation null that holds every cell position fixed,
+    <b>Normal Epithelial</b> is the population most enriched within
+    30µm of the tumour compartment
+    (log<sub>2</sub> 1.33), while <b>B-cells</b> is
+    the most excluded (log<sub>2</sub> -1.57).
+    <a href="spatial.html">See the spatial page.</a></li>
+</ol>
+
+<h2>Read it in order</h2>
+
+<div class="cards"><a class="card" href="qc.html"><span class="n">Stage 1</span><h3>Quality control</h3><p>Per-cell, per-run and position-aware checks, with the pass/fail criteria stated up front and a replicate-concordance arm that separates biology from batch.</p></a><a class="card" href="celltypes.html"><span class="n">Stage 2</span><h3>Cell typing</h3><p>Harmony-integrated k-NN label transfer from an scRNA-seq atlas, cross-checked against canonical markers, with panel coverage reported as a limit on resolution.</p></a><a class="card" href="spatial.html"><span class="n">Stage 3</span><h3>Spatial structure</h3><p>Neighbourhood enrichment, recurrent niches, and permutation-tested enrichment at the tumour–immune interface.</p></a><a class="card" href="methods.html"><span class="n">Reference</span><h3>Methods and limits</h3><p>Every parameter and threshold, the reproduction recipe, and a frank list of what this analysis cannot establish.</p></a></div>
+
+<h2>Why it was built this way</h2>
+
+<p>Three choices distinguish this from a notebook walkthrough, and each one exists because
+the alternative fails in production.</p>
+
+<p><b>Thresholds are configuration, not folklore.</b> Every QC cutoff lives in
+<code>config/config.yaml</code> and is written into the output tables alongside the verdict it
+produced. When a criterion is later judged too strict, the change is a one-line diff with a
+visible blast radius, not an archaeology exercise across notebook cells.</p>
+
+<p><b>Both replicates are analysed, not just the prettier one.</b> A single section cannot
+distinguish a biological gradient from a slide-level artefact. Two sections of the same block
+can, and the cross-replicate comparison is reported as a first-class result rather than a
+supplementary figure.</p>
+
+<p><b>Cell typing is run twice, by independent routes, and the disagreement is published.</b>
+Reference transfer and marker scoring fail in different ways: transfer inherits the reference's
+composition bias, marker scoring inherits the panel's blind spots. Where they agree the call is
+solid; where they do not, the honest output is a flag, not a label.</p>
+
+<div class="note"><span class="label">Note</span><p>The repository is tested. 21 unit tests run on synthetic fixtures in
+CI on every push — no data download required — covering the QC flags, the Moran's I
+statistic, niche recovery, the interface null model and the marker-ambiguity rule. A
+statistical function that cannot be tested on data with a known answer is a function nobody
+should trust.</p></div>
+
+<p style="color:var(--ink-faint);font-size:0.9rem">Analysis and site by
+<a href="https://ashokdwivedi.com">Ashok Dwivedi</a> — <a href="https://ashokdwivedi.com">ashokdwivedi.com</a>.</p>
+
+<div class="pager"><span></span><a href="qc.html" style="text-align:right"><span class="dir">Next</span>1 · Quality control</a></div>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="author-line">Built by <a href="https://ashokdwivedi.com">Ashok Dwivedi</a> —
+       <a href="https://ashokdwivedi.com">ashokdwivedi.com</a></p>
+    <p>Source, data-download script and unit tests:
+       <a href="https://github.com/ashokdwivedi/xenium-breast-tme">github.com/ashokdwivedi/xenium-breast-tme</a>. Released under the MIT licence.</p>
+    <p>Data are public: 10x Genomics Xenium In Situ FFPE Human Breast Cancer (Janesick et al. 2023)
+       and the breast-cancer scRNA-seq atlas of Wu et al. 2021 (GEO GSE176078). This site is an
+       independent methods demonstration and is not affiliated with or endorsed by 10x Genomics.</p>
+  </div>
+</footer>
+</body>
+</html>

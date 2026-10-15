@@ -1,0 +1,19 @@
+leiden,marker_label,top_score,score_gap,ambiguous,runner_up
+0,Epithelial (tumour),-0.049993686,0.012709022,True,Endothelial
+1,Epithelial (tumour),0.71319944,0.6424614,False,Endothelial
+10,Myeloid,1.4216175,1.2161192,False,Endothelial
+11,Plasma cell,3.0595918,2.4301517,False,Endothelial
+12,T cell,0.17073105,0.08170798,True,Endothelial
+13,Epithelial (tumour),0.8540916,0.26967752,False,Endothelial
+14,Fibroblast (CAF),1.0682648,0.63664657,False,Endothelial
+15,B cell,2.9839222,2.7230194,False,Endothelial
+16,Plasma cell,1.0174302,0.00042891502,True,Endothelial
+17,Mast cell,5.862354,5.3001575,False,Endothelial
+2,Epithelial (tumour),0.39903715,0.27979165,False,Endothelial
+3,Fibroblast (CAF),1.3627614,0.7567817,False,Endothelial
+4,Endothelial,1.5031368,0.6634706,False,Endothelial
+5,T cell,1.0937704,0.9880878,False,Endothelial
+6,T cell,0.94175047,0.79501164,False,Endothelial
+7,Perivascular (PVL),1.2448404,0.5872015,False,Endothelial
+8,Epithelial (tumour),0.8063721,0.5699549,False,Endothelial
+9,Epithelial (tumour),0.34769103,0.24792296,False,Endothelial

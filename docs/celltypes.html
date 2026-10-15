@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cell typing against a single-cell reference — Xenium breast TME</title>
+<meta name="description" content="Harmony-integrated label transfer from a breast-cancer scRNA-seq atlas, cross-checked against canonical markers.">
+<meta name="author" content="Ashok Dwivedi">
+<meta property="og:title" content="Cell typing against a single-cell reference">
+<meta property="og:description" content="Harmony-integrated label transfer from a breast-cancer scRNA-seq atlas, cross-checked against canonical markers.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="masthead-title" href="index.html">Xenium breast TME</a>
+    <nav class="site-nav">
+        <a href="index.html">Overview</a>
+        <a href="qc.html">1 · Quality control</a>
+        <a href="celltypes.html" class="current">2 · Cell typing</a>
+        <a href="spatial.html">3 · Spatial structure</a>
+        <a href="methods.html">Methods</a>
+        <a href="about.html">About</a>
+        <a href="https://github.com/ashokdwivedi/xenium-breast-tme">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+<main>
+<p class="kicker">2 · Cell typing</p>
+<h1>Cell typing against a single-cell reference</h1>
+<p class="lede">Harmony-integrated label transfer from a breast-cancer scRNA-seq atlas, cross-checked against canonical markers.</p>
+
+<p>A 313-gene targeted panel is not a transcriptome. It
+resolves the lineages it was designed to resolve and is blind to everything else, so the useful
+question is not "what cell type is this?" but "which assignments does this panel actually
+support, and which are guesses dressed as labels?" The approach here is to type the cells twice,
+by methods that fail differently, and report where they disagree.</p>
+
+<h2>Route A — transfer from a single-cell reference</h2>
+
+<p>The reference is the breast-cancer atlas of Wu&nbsp;et&nbsp;al. (2021, GEO GSE176078):
+34,730 cells after subsetting to panel genes and capping each label at
+4,000 cells, so that an abundant population cannot win the
+k-nearest-neighbour vote on prior alone. Reference and Xenium cells are normalised identically,
+projected into a shared PCA space, and integrated with Harmony — because the dominant axis
+of variation between an scRNA-seq dataset and an in situ panel is the assay, not the biology,
+and a k-NN vote in unintegrated space would simply recover the batch.</p>
+
+<p>Each Xenium cell takes a distance-weighted vote of its
+25 nearest reference neighbours. A cell whose vote does not reach the
+confidence floor is labelled <code>Unassigned</code> rather than forced into the nearest class
+— 2.23% of cells end up there, and keeping them visible is the
+point: a transfer that assigns everything is not more accurate, it is less honest.</p>
+
+<h2>Route B — canonical markers, scored on clusters</h2>
+
+<p>Independently, cells are clustered with Leiden
+(18 clusters at the chosen resolution) and each cluster is scored
+against curated marker sets for the lineages a breast panel can see. Scoring is done on
+clusters rather than single cells because a 313-gene panel
+at single-cell depth is too sparse for per-cell marker calls to be stable. A cluster whose best
+and second-best lineage scores are within a narrow margin is flagged <code>ambiguous</code>
+instead of labelled.</p>
+
+<figure>
+<img src="assets/figures/fig04_umap_clusters.png" alt="UMAP of Leiden clusters beside the same clusters plotted in tissue coordinates" loading="lazy">
+<figcaption><b>Unsupervised structure, before any labels.</b> (a) Leiden clusters in UMAP space. (b) The same clusters mapped back to tissue coordinates — the clusters are spatially coherent, which is a meaningful check: transcriptional clusters derived without any positional information should not be spatially random in a structured tissue, and clusters that <em>are</em> scattered uniformly are usually technical.</figcaption>
+</figure>
+
+<h2>The resulting map</h2>
+
+<figure>
+<img src="assets/figures/fig05_celltypes.png" alt="UMAP, tissue map and composition bar chart of annotated cell types" loading="lazy">
+<figcaption><b>Cell types in transcriptional and physical space.</b> Colour is bound to cell-type identity once and reused in every figure on this site. The tissue map (centre) shows the architecture the composition bar chart (right) cannot: epithelial tumour in discrete nests, stromal and immune populations filling the space between them.</figcaption>
+</figure>
+
+<div class="table-wrap"><table><thead><tr><th>Cell type</th><th class="num">Cells</th><th class="num">Share</th></tr></thead><tbody><tr><td>Cancer Epithelial</td><td class="num">65,636</td><td class="num">40.1%</td></tr><tr><td>T-cells</td><td class="num">29,245</td><td class="num">17.9%</td></tr><tr><td>CAFs</td><td class="num">20,487</td><td class="num">12.5%</td></tr><tr><td>Myeloid</td><td class="num">16,481</td><td class="num">10.1%</td></tr><tr><td>Endothelial</td><td class="num">13,001</td><td class="num">7.9%</td></tr><tr><td>Normal Epithelial</td><td class="num">8,800</td><td class="num">5.4%</td></tr><tr><td>Plasmablasts</td><td class="num">4,658</td><td class="num">2.8%</td></tr><tr><td>B-cells</td><td class="num">4,631</td><td class="num">2.8%</td></tr><tr><td>Unassigned</td><td class="num">733</td><td class="num">0.4%</td></tr></tbody></table></div>
+
+<h2>Where the two routes disagree</h2>
+
+<p>The routes agree on 78% of clusters. Agreement
+between a reference-based and a marker-based call is not proof — both can be wrong the same
+way if the panel lacks a discriminating gene — but disagreement is a reliable warning.</p>
+
+<figure>
+<img src="assets/figures/fig06_annotation_quality.png" alt="Transfer confidence, route agreement matrix and marker coverage per lineage" loading="lazy">
+<figcaption><b>How far to trust each label.</b> (a) Transfer confidence by assigned type; the dashed line is the floor below which a cell is left unassigned. Populations with systematically low confidence are the ones the panel separates poorly. (b) Agreement matrix between the two routes, row-normalised. (c) Marker coverage per lineage — dark bars are canonical markers present on the panel, light bars are markers the panel does not carry. A lineage with few panel markers cannot be resolved by either route, and reading this panel first prevents over-interpreting the other two.</figcaption>
+</figure>
+
+<div class="table-wrap"><table><thead><tr><th>Cluster</th><th>Reference transfer</th><th>Marker call</th><th class="num">Cells</th><th class="num">Mean confidence</th></tr></thead><tbody><tr><td>12</td><td>B-cells</td><td>T cell</td><td class="num">683</td><td class="num">0.86</td></tr><tr><td>16</td><td>Myeloid</td><td>Plasma cell</td><td class="num">634</td><td class="num">0.97</td></tr><tr><td>17</td><td>Unassigned</td><td>Mast cell</td><td class="num">733</td><td class="num">0.42</td></tr><tr><td>7</td><td>Normal Epithelial</td><td>Perivascular (PVL)</td><td class="num">5,885</td><td class="num">0.93</td></tr></tbody></table></div><div class="note"><span class="label">Flagged</span><p>These 4 clusters carry a caveat, not a label. <p>Panel coverage explains part of this: the <b>Plasma cell</b> marker set has only 3 of 5 canonical genes on the panel, so the marker route is working with less evidence than the transfer route for that lineage.</p></p><p>Cluster 17 is the most informative disagreement: the reference transfer leaves it <code>Unassigned</code> at a mean confidence of 0.42, below the floor, while the marker route calls it <b>Mast cell</b>. That is the expected signature of a population the reference's coarse labels do not contain — the transfer route cannot name what it was never shown, and declining to guess is the correct behaviour. Here the second route recovers it. Neither route alone would have.</p></div>
+
+<div class="caveat"><span class="label">Limitation</span><p><b>What this cell typing does not establish.</b> Labels are transferred from a
+reference built on different patients, so a population present in this tumour but absent from
+the atlas cannot be named — it can only appear as low-confidence or unassigned. Cell
+<em>states</em> (exhaustion, activation, EMT) are largely out of reach: the panel carries too few
+of the genes that define them, and this analysis deliberately stops at lineage rather than
+reporting state calls the data cannot support. Finally, the Xenium segmentation is nucleus
+expansion, so transcripts from a tightly apposed neighbour are assigned to the wrong cell at
+exactly the boundaries that matter most for the interface analysis that follows.</p></div>
+
+<div class="pager"><a href="qc.html"><span class="dir">Previous</span>1 · Quality control</a><a href="spatial.html" style="text-align:right"><span class="dir">Next</span>3 · Spatial structure</a></div>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="author-line">Built by <a href="https://ashokdwivedi.com">Ashok Dwivedi</a> —
+       <a href="https://ashokdwivedi.com">ashokdwivedi.com</a></p>
+    <p>Source, data-download script and unit tests:
+       <a href="https://github.com/ashokdwivedi/xenium-breast-tme">github.com/ashokdwivedi/xenium-breast-tme</a>. Released under the MIT licence.</p>
+    <p>Data are public: 10x Genomics Xenium In Situ FFPE Human Breast Cancer (Janesick et al. 2023)
+       and the breast-cancer scRNA-seq atlas of Wu et al. 2021 (GEO GSE176078). This site is an
+       independent methods demonstration and is not affiliated with or endorsed by 10x Genomics.</p>
+  </div>
+</footer>
+</body>
+</html>

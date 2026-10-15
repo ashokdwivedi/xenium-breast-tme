@@ -1,0 +1,22 @@
+# Data are downloaded, never committed (see scripts/download_data.sh)
+data/
+!data/MANIFEST.md
+*.h5ad
+*.zarr/
+
+# Results: figures and tables ARE committed so the website renders on a clean
+# clone; large intermediates are not.
+results/**/*.pkl
+results/**/*.npz
+
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.DS_Store
+env/
+venv/
+.venv/
+site/
+.numba_cache/

@@ -1,0 +1,19 @@
+leiden,n_cells,transferred_majority,marker_label,marker_ambiguous,mean_transfer_confidence,median_n_counts,routes_agree
+0,3451,Cancer Epithelial,Epithelial (tumour),True,0.6992748,27.0,True
+1,12750,Cancer Epithelial,Epithelial (tumour),False,0.8017942,211.0,True
+10,15847,Myeloid,Myeloid,False,0.9488742,144.0,True
+11,4658,Plasmablasts,Plasma cell,False,0.96382505,149.0,True
+12,683,B-cells,T cell,True,0.8617525,68.0,False
+13,2915,Normal Epithelial,Epithelial (tumour),False,0.9563443,185.0,True
+14,1370,CAFs,Fibroblast (CAF),False,0.8025599,307.0,True
+15,3948,B-cells,B cell,False,0.9600193,87.5,True
+16,634,Myeloid,Plasma cell,True,0.97222024,133.0,False
+17,733,Unassigned,Mast cell,False,0.42458028,146.0,False
+2,25961,Cancer Epithelial,Epithelial (tumour),False,0.68657357,225.0,True
+3,19117,CAFs,Fibroblast (CAF),False,0.95321685,206.0,True
+4,13001,Endothelial,Endothelial,False,0.93968177,145.0,True
+5,10026,T-cells,T cell,False,0.907559,108.0,True
+6,19219,T-cells,T cell,False,0.9029744,94.0,True
+7,5885,Normal Epithelial,Perivascular (PVL),False,0.9305275,160.0,False
+8,13957,Cancer Epithelial,Epithelial (tumour),False,0.7186821,265.0,True
+9,9517,Cancer Epithelial,Epithelial (tumour),False,0.912814,251.0,True

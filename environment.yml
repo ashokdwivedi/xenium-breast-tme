@@ -1,0 +1,24 @@
+name: xenium-breast-tme
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - scanpy
+  - squidpy
+  - anndata
+  - leidenalg
+  - python-igraph
+  - harmonypy
+  - scikit-learn
+  - scipy
+  - numpy
+  - pandas
+  - pyarrow
+  - matplotlib
+  - seaborn
+  - h5py
+  - numba
+  - tqdm
+  - pyyaml
+  - pytest
+  - ruff

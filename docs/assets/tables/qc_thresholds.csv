@@ -1,0 +1,12 @@
+,value
+min_transcripts,10.0
+min_genes,5.0
+min_cell_area,15.0
+max_cell_area,1500.0
+max_control_rate,0.05
+max_nucleus_ratio,1.0
+max_run_neg_probe_rate,0.01
+max_run_neg_codeword_rate,0.005
+min_median_transcripts,20.0
+min_cells_passing,0.7
+grid_bin_um,100.0

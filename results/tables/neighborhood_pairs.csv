@@ -1,0 +1,37 @@
+pair,z
+Cancer Epithelial – T-cells,-281.61097400343493
+Cancer Epithelial – CAFs,-237.50410286570673
+Cancer Epithelial – Myeloid,-168.967806711787
+Cancer Epithelial – Endothelial,-154.07114719068372
+Cancer Epithelial – Normal Epithelial,-38.496243036366536
+Cancer Epithelial – Plasmablasts,-112.7783918528147
+Cancer Epithelial – B-cells,-122.17805717294668
+Cancer Epithelial – Unassigned,-44.03032033021026
+T-cells – CAFs,1.244566399841508
+T-cells – Myeloid,72.44468173682667
+T-cells – Endothelial,-5.571012725216619
+T-cells – Normal Epithelial,-74.89535615814786
+T-cells – Plasmablasts,46.61260739770096
+T-cells – B-cells,115.86950477240633
+T-cells – Unassigned,6.7137943161616676
+CAFs – Myeloid,60.74916640638112
+CAFs – Endothelial,6.582995929962184
+CAFs – Normal Epithelial,-35.80132682907727
+CAFs – Plasmablasts,47.75759157881608
+CAFs – B-cells,-5.260797387490154
+CAFs – Unassigned,33.35679540613406
+Myeloid – Endothelial,3.862544370097286
+Myeloid – Normal Epithelial,-36.378220239542244
+Myeloid – Plasmablasts,39.01596022016058
+Myeloid – B-cells,25.29384917412737
+Myeloid – Unassigned,13.742514706373123
+Endothelial – Normal Epithelial,-31.029388400905706
+Endothelial – Plasmablasts,-10.337740719615496
+Endothelial – B-cells,-19.50326170061152
+Endothelial – Unassigned,2.2325670552135564
+Normal Epithelial – Plasmablasts,-36.86291551969792
+Normal Epithelial – B-cells,-37.5976078306723
+Normal Epithelial – Unassigned,-11.011108955707044
+Plasmablasts – B-cells,17.883990447888408
+Plasmablasts – Unassigned,19.67260091216791
+B-cells – Unassigned,0.6280331928281485

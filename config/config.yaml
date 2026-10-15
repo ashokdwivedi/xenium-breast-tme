@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------------------
+# xenium-breast-tme pipeline configuration
+# Every number the analysis depends on lives here, not in the scripts.
+# ---------------------------------------------------------------------------
+paths:
+  raw: data/raw
+  interim: data/interim
+  processed: data/processed
+  figures: results/figures
+  tables: results/tables
+
+samples:
+  Rep1: data/raw/Xenium_FFPE_Human_Breast_Cancer_Rep1
+  Rep2: data/raw/Xenium_FFPE_Human_Breast_Cancer_Rep2
+
+reference:
+  dir: data/raw/GSE176078/Wu_etal_2021_BRCA_scRNASeq
+  label_keys: [celltype_major, celltype_minor]
+  # Reference cells per label kept for transfer; caps the cost of Harmony and
+  # stops abundant populations from dominating the k-NN vote.
+  max_cells_per_label: 4000
+
+qc:
+  min_transcripts: 10
+  min_genes: 5
+  min_cell_area: 15.0
+  max_cell_area: 1500.0
+  max_control_rate: 0.05
+  max_nucleus_ratio: 1.0
+  max_run_neg_probe_rate: 0.01
+  max_run_neg_codeword_rate: 0.005
+  min_median_transcripts: 20.0
+  min_cells_passing: 0.70
+  grid_bin_um: 100.0
+
+cluster:
+  n_pcs: 30
+  n_neighbors: 15
+  resolutions: [0.3, 0.5, 0.8, 1.0]
+  chosen_resolution: 0.8
+
+transfer:
+  k: 25
+  min_confidence: 0.5
+
+spatial:
+  graph: delaunay
+  max_edge_um: 60.0
+  niche_k: 20
+  n_niches: 8
+  interface_um: 30.0
+  n_perms: 1000
+
+primary_sample: Rep1
+seed: 0

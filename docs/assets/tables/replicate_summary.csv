@@ -1,0 +1,5 @@
+,value
+pearson_log10cpm,0.9920039096913643
+spearman_cpm,0.9927316685268293
+n_genes,313.0
+n_genes_abs_log2fc_gt1,7.0

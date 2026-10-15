@@ -1,0 +1,9 @@
+{
+  "sample": "Rep1",
+  "n_cells_qc_pass": 163672,
+  "n_leiden_clusters": 18,
+  "n_reference_cells": 34730,
+  "frac_unassigned": 0.022349577203186862,
+  "median_transfer_confidence": 0.9565540552139282,
+  "frac_clusters_routes_agree": 0.7777777777777778
+}

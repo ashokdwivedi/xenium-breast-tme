@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Methods, reproducibility and limitations — Xenium breast TME</title>
+<meta name="description" content="Every parameter, every threshold, and an honest account of what this analysis cannot tell you.">
+<meta name="author" content="Ashok Dwivedi">
+<meta property="og:title" content="Methods, reproducibility and limitations">
+<meta property="og:description" content="Every parameter, every threshold, and an honest account of what this analysis cannot tell you.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="masthead-title" href="index.html">Xenium breast TME</a>
+    <nav class="site-nav">
+        <a href="index.html">Overview</a>
+        <a href="qc.html">1 · Quality control</a>
+        <a href="celltypes.html">2 · Cell typing</a>
+        <a href="spatial.html">3 · Spatial structure</a>
+        <a href="methods.html" class="current">Methods</a>
+        <a href="about.html">About</a>
+        <a href="https://github.com/ashokdwivedi/xenium-breast-tme">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+<main>
+<p class="kicker">Methods</p>
+<h1>Methods, reproducibility and limitations</h1>
+<p class="lede">Every parameter, every threshold, and an honest account of what this analysis cannot tell you.</p>
+
+<h2>Data</h2>
+<p>Two public datasets, both downloaded by <code>scripts/download_data.sh</code>, which also
+writes a <code>SHA256SUMS</code> manifest so a rerun can be verified byte-for-byte.</p>
+<ul>
+<li><b>10x Genomics Xenium In Situ, FFPE Human Breast Cancer, Replicates 1 and 2.</b> A
+313-gene breast panel on two serial sections of one tumour
+block; 286,532 segmented cells in total. Described in Janesick
+et&nbsp;al., <i>Nature Communications</i> 2023.</li>
+<li><b>Breast-cancer scRNA-seq atlas</b> of Wu et&nbsp;al., <i>Nature Genetics</i> 2021
+(GEO accession GSE176078), used as the label-transfer reference.</li>
+</ul>
+
+<h2>Pipeline</h2>
+<pre><code>bash scripts/download_data.sh     # public data + checksums
+make qc                           # stage 1 -> results/tables/qc_scorecard.csv
+make annotate                     # stage 2 -> data/processed/Rep1_annotated.h5ad
+make spatial                      # stage 3 -> results/tables/immune_distance_stats.csv
+python scripts/04_build_site.py   # this website
+make test                         # unit tests, no data required</code></pre>
+
+<h3>Stage 1 — quality control</h3>
+<p>Counts, genes, control-feature fraction, cell and nucleus area and transcript density are
+computed per cell from the raw matrix with negative-control features retained (they are dropped
+only after the control rate has been computed from them). Run-level rates are recomputed from
+the matrix rather than copied from the vendor <code>metrics_summary.csv</code>, which is carried
+alongside for comparison. Regional artefacts are tested by binning the section into
+100&nbsp;µm squares and computing Moran's I with a queen-contiguity
+weight matrix and a 199-permutation null.</p>
+
+<h3>Stage 2 — cell typing</h3>
+<p>Counts are normalised to a fixed total per cell and log1p-transformed; the full panel is used
+as features, since variable-gene selection is meaningless on a targeted panel where every gene
+was chosen for informativeness. PCA to 30 components, Leiden
+clustering over a resolution sweep with the chosen value recorded in the config, and Harmony
+integration of Xenium with the reference before a distance-weighted k-nearest-neighbour vote.
+Cells below the confidence floor are left unassigned. Marker scoring uses
+<code>scanpy.tl.score_genes</code> against curated per-lineage sets, aggregated to clusters.</p>
+
+<h3>Stage 3 — spatial analysis</h3>
+<p>Delaunay graph with a distance cap; neighbourhood enrichment by label permutation with
+positions held fixed; niches by k-means on fixed-<i>k</i> neighbourhood composition vectors;
+interface enrichment by permutation with Benjamini–Hochberg correction across populations.
+Distances are Euclidean in microns on the vendor's cell centroids.</p>
+
+<h2>Parameters</h2>
+<p>The complete set, as applied. These are read from <code>config/config.yaml</code> at run time
+and written to <code>results/tables/</code> with the outputs they produced.</p>
+<div class="table-wrap"><table><thead><tr><th>Parameter</th><th class="num">Value</th></tr></thead><tbody><tr><td>min transcripts</td><td class="num">10</td></tr><tr><td>min genes</td><td class="num">5</td></tr><tr><td>min cell area</td><td class="num">15</td></tr><tr><td>max cell area</td><td class="num">1500</td></tr><tr><td>max control rate</td><td class="num">0.05</td></tr><tr><td>max nucleus ratio</td><td class="num">1</td></tr><tr><td>max run neg probe rate</td><td class="num">0.01</td></tr><tr><td>max run neg codeword rate</td><td class="num">0.005</td></tr><tr><td>min median transcripts</td><td class="num">20</td></tr><tr><td>min cells passing</td><td class="num">0.7</td></tr><tr><td>grid bin um</td><td class="num">100</td></tr></tbody></table></div>
+
+<h2>Reproducibility</h2>
+<ul>
+<li><b>Pinned environment.</b> <code>environment.yml</code> for conda;
+<code>pyproject.toml</code> for pip.</li>
+<li><b>Deterministic.</b> One seed in the config threads through Leiden, Harmony, k-means and
+every permutation test.</li>
+<li><b>Tested.</b> 21 unit tests on synthetic fixtures with known answers, run in CI
+on every push. The fixtures include a section with two spatially separated compartments, so
+niche recovery and the interface null can be checked against a ground truth.</li>
+<li><b>Checksummed inputs.</b> The download script writes SHA-256 sums for every file it
+fetches.</li>
+<li><b>No hand-edited numbers.</b> Every figure is produced by a script, and every number on
+this website is injected from <code>results/tables/</code> when the site is built.</li>
+</ul>
+
+<h2>What this analysis cannot tell you</h2>
+<ul>
+<li><b>One tumour.</b> Two sections of one block. Nothing here generalises to breast cancer as a
+disease; the value is in the method, not the biological claim.</li>
+<li><b>No morphology channel.</b> H&amp;E-to-DAPI registration, and therefore any
+pathologist-annotated region analysis, is outside what this public bundle supports.</li>
+<li><b>Segmentation is nucleus expansion.</b> Transcript misassignment between tightly apposed
+cells is unquantified here and is worst exactly at the tumour boundary.</li>
+<li><b>Lineage, not state.</b> The panel cannot support exhaustion, activation or EMT calls, so
+none are made.</li>
+<li><b>Proximity is not interaction.</b> Every spatial result is a description of arrangement.</li>
+<li><b>Assumption diagnostics were not run.</b> The permutation tests are distribution-free by
+construction; no further residual or normality checks were performed.</li>
+</ul>
+
+<h2>References</h2>
+<ol>
+<li>Janesick A, et&nbsp;al. High resolution mapping of the tumor microenvironment using
+integrated single-cell, spatial and in situ analysis. <i>Nature Communications</i> 14, 8353
+(2023).</li>
+<li>Wu SZ, et&nbsp;al. A single-cell and spatially resolved atlas of human breast cancers.
+<i>Nature Genetics</i> 53, 1334–1347 (2021). GEO: GSE176078.</li>
+<li>Palla G, et&nbsp;al. Squidpy: a scalable framework for spatial omics analysis.
+<i>Nature Methods</i> 19, 171–178 (2022).</li>
+<li>Korsunsky I, et&nbsp;al. Fast, sensitive and accurate integration of single-cell data with
+Harmony. <i>Nature Methods</i> 16, 1289–1296 (2019).</li>
+<li>Wolf FA, Angerer P, Theis FJ. SCANPY: large-scale single-cell gene expression data analysis.
+<i>Genome Biology</i> 19, 15 (2018).</li>
+</ol>
+
+<p>Code: <a href="https://github.com/ashokdwivedi/xenium-breast-tme">github.com/ashokdwivedi/xenium-breast-tme</a>. Author:
+<a href="https://ashokdwivedi.com">ashokdwivedi.com</a>.</p>
+
+<div class="pager"><a href="spatial.html"><span class="dir">Previous</span>3 · Spatial structure</a><a href="about.html" style="text-align:right"><span class="dir">Next</span>About</a></div>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="author-line">Built by <a href="https://ashokdwivedi.com">Ashok Dwivedi</a> —
+       <a href="https://ashokdwivedi.com">ashokdwivedi.com</a></p>
+    <p>Source, data-download script and unit tests:
+       <a href="https://github.com/ashokdwivedi/xenium-breast-tme">github.com/ashokdwivedi/xenium-breast-tme</a>. Released under the MIT licence.</p>
+    <p>Data are public: 10x Genomics Xenium In Situ FFPE Human Breast Cancer (Janesick et al. 2023)
+       and the breast-cancer scRNA-seq atlas of Wu et al. 2021 (GEO GSE176078). This site is an
+       independent methods demonstration and is not affiliated with or endorsed by 10x Genomics.</p>
+  </div>
+</footer>
+</body>
+</html>

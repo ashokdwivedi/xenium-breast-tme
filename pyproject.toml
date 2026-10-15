@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xtme"
+version = "0.1.0"
+description = "Xenium tumour microenvironment QC, cell typing and spatial analysis"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Ashok Dwivedi" }]
+dependencies = [
+  "anndata", "scanpy", "squidpy", "harmonypy", "scikit-learn",
+  "numpy", "pandas", "scipy", "matplotlib", "seaborn", "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[project.urls]
+Homepage = "https://ashokdwivedi.com"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# E702: paired axis-setup calls (set_xticks/set_yticks) read better on one line.
+# B905: zip() strictness is not meaningful for the fixed-length pairs used here.
+ignore = ["E501", "E702", "B905"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

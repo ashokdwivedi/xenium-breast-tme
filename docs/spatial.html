@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spatial neighbourhoods and the tumour–immune interface — Xenium breast TME</title>
+<meta name="description" content="Who touches whom, which recurrent niches the tissue is built from, and which populations are enriched at the tumour boundary.">
+<meta name="author" content="Ashok Dwivedi">
+<meta property="og:title" content="Spatial neighbourhoods and the tumour–immune interface">
+<meta property="og:description" content="Who touches whom, which recurrent niches the tissue is built from, and which populations are enriched at the tumour boundary.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="masthead-title" href="index.html">Xenium breast TME</a>
+    <nav class="site-nav">
+        <a href="index.html">Overview</a>
+        <a href="qc.html">1 · Quality control</a>
+        <a href="celltypes.html">2 · Cell typing</a>
+        <a href="spatial.html" class="current">3 · Spatial structure</a>
+        <a href="methods.html">Methods</a>
+        <a href="about.html">About</a>
+        <a href="https://github.com/ashokdwivedi/xenium-breast-tme">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+<main>
+<p class="kicker">3 · Spatial structure</p>
+<h1>Spatial neighbourhoods and the tumour–immune interface</h1>
+<p class="lede">Who touches whom, which recurrent niches the tissue is built from, and which populations are enriched at the tumour boundary.</p>
+
+<p>Cell typing answers <em>what is here</em>. The tissue question is <em>what is next to what</em>,
+and it needs a different set of tools: a spatial graph, a null model that respects the geometry,
+and effect sizes rather than p-values alone. With 167,780 cells,
+almost any arrangement is "significant"; the number that matters is how far from random it is.</p>
+
+<h2>The spatial graph</h2>
+
+<p>Neighbours are defined by Delaunay triangulation with edges longer than
+60&nbsp;µm removed. This choice matters more than
+it looks. A fixed-<i>k</i> graph spans a few microns inside a dense tumour nest and tens of
+microns in loose stroma, so a single <i>k</i> silently asks a different biological question in
+each compartment. Delaunay adapts to local density; the distance cap stops cells on opposite
+sides of a tissue void from being called neighbours.</p>
+
+<h2>Which cell types touch each other?</h2>
+
+<figure>
+<img src="assets/figures/fig07_neighborhood_enrichment.png" alt="Heatmap and ranked bar chart of cell-type neighbourhood enrichment z-scores" loading="lazy">
+<figcaption><b>Neighbourhood enrichment.</b> Z-scores compare observed adjacency counts against a null that permutes cell-type labels while holding every cell position fixed, so the null preserves tissue density and shape exactly. Positive (blue) means the pair is found adjacent more often than chance; negative (red) means the pair is segregated.</figcaption>
+</figure>
+
+<p>The strongest segregation is <b>Cancer Epithelial – T-cells</b> (z&nbsp;=&nbsp;-282)
+and the strongest co-location is <b>T-cells – B-cells</b> (z&nbsp;=&nbsp;116).
+The diagonal of the matrix is strongly positive throughout, which is the expected signature of a
+compartmentalised tissue: cells of a type are overwhelmingly adjacent to their own kind. In a
+tumour that pattern is the quantitative statement of "nests and stroma", and its strength is the
+thing worth comparing between patients.</p>
+
+<h2>Recurrent niches</h2>
+
+<p>Pairwise adjacency misses multi-way structure — a region where three populations are
+interleaved is not described by any single pair. Niches capture it directly: for every cell,
+take the cell-type composition of its 20 nearest neighbours,
+and cluster those composition vectors across the whole section. Cells land in the same niche when
+their local <em>mixture</em> is alike, regardless of where in the tissue they sit.</p>
+
+<figure>
+<img src="assets/figures/fig08_niches.png" alt="Tissue map of spatial niches beside a stacked composition bar chart" loading="lazy">
+<figcaption><b>Niches and their composition.</b> (a) Each cell coloured by its niche; the niches reconstruct recognisable tissue architecture — tumour nest interiors, their boundaries, and distinct stromal and immune territories — without the algorithm ever being given a coordinate beyond the neighbour graph. (b) Mean neighbourhood composition of each niche, which is what makes the labels in (a) interpretable.</figcaption>
+</figure>
+
+<div class="table-wrap"><table><thead><tr><th>Niche</th><th>Dominant composition</th></tr></thead><tbody><tr><td>N0</td><td>Cancer Epithelial 40%, T-cells 14%, Endothelial 12%</td></tr><tr><td>N1</td><td>Cancer Epithelial 69%, Normal Epithelial 7%, Endothelial 7%</td></tr><tr><td>N2</td><td>T-cells 62%, Myeloid 11%, B-cells 10%</td></tr><tr><td>N3</td><td>Endothelial 43%, T-cells 16%, CAFs 16%</td></tr><tr><td>N4</td><td>Cancer Epithelial 95%, Myeloid 2%, T-cells 1%</td></tr><tr><td>N5</td><td>CAFs 56%, Myeloid 15%, T-cells 11%</td></tr><tr><td>N6</td><td>T-cells 32%, Myeloid 22%, CAFs 16%</td></tr><tr><td>N7</td><td>Normal Epithelial 56%, Cancer Epithelial 22%, CAFs 8%</td></tr></tbody></table></div>
+
+<h2>The tumour–immune interface</h2>
+
+<p>The clinically interesting question is not whether immune cells are present but whether they
+reach the tumour. Each non-tumour cell is assigned its Euclidean distance to the nearest cell of
+the tumour compartment, and the test asks whether a population is over- or under-represented
+within 30&nbsp;µm of that boundary relative to
+a null that permutes cell-type labels across fixed positions
+(1,000 permutations, Benjamini–Hochberg corrected).</p>
+
+<figure>
+<img src="assets/figures/fig09_tumour_immune_interface.png" alt="Distance map, per-population distance distributions and interface enrichment bars" loading="lazy">
+<figcaption><b>Distance to tumour and interface enrichment.</b> (a) Every cell coloured by distance to the nearest tumour cell, which makes the boundary geometry explicit. (b) Distance distributions per population. (c) Enrichment within the interface band against the permuted null, with BH-adjusted significance.</figcaption>
+</figure>
+
+<div class="table-wrap"><table><thead><tr><th>Population</th><th class="num">Observed in band</th><th class="num">Expected (null)</th><th class="num">log₂ enrichment</th><th class="num">z</th><th class="num">q (BH)</th></tr></thead><tbody><tr><td>Normal Epithelial</td><td class="num">90.4%</td><td class="num">36.0%</td><td class="num">1.33</td><td class="num">111.7</td><td class="num">0.008</td></tr><tr><td>Endothelial</td><td class="num">46.4%</td><td class="num">36.0%</td><td class="num">0.36</td><td class="num">25.6</td><td class="num">0.004</td></tr><tr><td>Myeloid</td><td class="num">38.1%</td><td class="num">36.0%</td><td class="num">0.08</td><td class="num">6.4</td><td class="num">0.003</td></tr><tr><td>T-cells</td><td class="num">28.2%</td><td class="num">36.0%</td><td class="num">-0.35</td><td class="num">-33.5</td><td class="num">0.002</td></tr><tr><td>CAFs</td><td class="num">25.4%</td><td class="num">36.0%</td><td class="num">-0.50</td><td class="num">-37.3</td><td class="num">0.002</td></tr><tr><td>Unassigned</td><td class="num">23.6%</td><td class="num">36.0%</td><td class="num">-0.61</td><td class="num">-7.0</td><td class="num">0.001</td></tr><tr><td>Plasmablasts</td><td class="num">18.0%</td><td class="num">36.0%</td><td class="num">-1.00</td><td class="num">-25.3</td><td class="num">0.001</td></tr><tr><td>B-cells</td><td class="num">12.1%</td><td class="num">36.0%</td><td class="num">-1.57</td><td class="num">-33.9</td><td class="num">&lt; 0.001</td></tr></tbody></table></div>
+
+<p>8 of 8 non-tumour populations differ significantly from the null at
+q&nbsp;&lt;&nbsp;0.05. <b>Normal Epithelial</b> is the most strongly enriched population at the boundary (log<sub>2</sub>&nbsp;1.33, 90.4% of its cells within the band against 36.0% expected) and <b>B-cells</b> is the most strongly excluded (log<sub>2</sub>&nbsp;-1.57). The direction and magnitude together are the result; the p-value on this many cells is not informative on its own.</p>
+
+<div class="caveat"><span class="label">Limitation</span><p><b>Read these as description, not mechanism.</b> Proximity is not interaction: two
+cells 20&nbsp;µm apart in a fixed section may never have signalled to each other, and
+ligand–receptor inference on a targeted panel would add precision without adding evidence.
+The permutation null holds positions fixed and shuffles labels, so it controls for tissue
+geometry and density but not for the possibility that cell typing errors are themselves
+spatially structured — segmentation bleed at the tumour boundary is exactly such an error,
+and it would act to inflate apparent immune presence at the interface. One section of one tumour
+supports no claim about breast cancer in general.</p></div>
+
+<div class="pager"><a href="celltypes.html"><span class="dir">Previous</span>2 · Cell typing</a><a href="methods.html" style="text-align:right"><span class="dir">Next</span>Methods</a></div>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="author-line">Built by <a href="https://ashokdwivedi.com">Ashok Dwivedi</a> —
+       <a href="https://ashokdwivedi.com">ashokdwivedi.com</a></p>
+    <p>Source, data-download script and unit tests:
+       <a href="https://github.com/ashokdwivedi/xenium-breast-tme">github.com/ashokdwivedi/xenium-breast-tme</a>. Released under the MIT licence.</p>
+    <p>Data are public: 10x Genomics Xenium In Situ FFPE Human Breast Cancer (Janesick et al. 2023)
+       and the breast-cancer scRNA-seq atlas of Wu et al. 2021 (GEO GSE176078). This site is an
+       independent methods demonstration and is not affiliated with or endorsed by 10x Genomics.</p>
+  </div>
+</footer>
+</body>
+</html>

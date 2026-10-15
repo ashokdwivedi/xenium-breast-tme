@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quality control: what to trust before anything else — Xenium breast TME</title>
+<meta name="description" content="Per-cell, per-run and position-aware checks across two replicate sections, with explicit pass/fail criteria.">
+<meta name="author" content="Ashok Dwivedi">
+<meta property="og:title" content="Quality control: what to trust before anything else">
+<meta property="og:description" content="Per-cell, per-run and position-aware checks across two replicate sections, with explicit pass/fail criteria.">
+<meta property="og:type" content="article">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <a class="masthead-title" href="index.html">Xenium breast TME</a>
+    <nav class="site-nav">
+        <a href="index.html">Overview</a>
+        <a href="qc.html" class="current">1 · Quality control</a>
+        <a href="celltypes.html">2 · Cell typing</a>
+        <a href="spatial.html">3 · Spatial structure</a>
+        <a href="methods.html">Methods</a>
+        <a href="about.html">About</a>
+        <a href="https://github.com/ashokdwivedi/xenium-breast-tme">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+<main>
+<p class="kicker">1 · Quality control</p>
+<h1>Quality control: what to trust before anything else</h1>
+<p class="lede">Per-cell, per-run and position-aware checks across two replicate sections, with explicit pass/fail criteria.</p>
+
+<p>Quality control for in situ data is not one question but three, and they are worth keeping
+apart because they fail for different reasons and have different remedies. <b>Is this cell
+real?</b> is a filtering problem. <b>Is this run usable?</b> is a go/no-go decision about the
+slide. <b>Is the defect regional?</b> is the question that distinguishes a tissue gradient from
+a decoding or imaging artefact, and it is the one most often skipped.</p>
+
+<h2>The criteria, stated before the data</h2>
+
+<p>Every threshold below is read from <code>config/config.yaml</code>, written into
+<code>results/tables/qc_thresholds.csv</code> next to the verdict it produced, and applied
+identically to both sections. Nothing was tuned after seeing the outcome.</p>
+
+<div class="table-wrap"><table><thead><tr><th>Per-cell criterion</th><th class="num">Cells failing, Rep1</th><th class="num">Cells failing, Rep2</th></tr></thead><tbody><tr><td>Fewer than 10 transcripts</td><td class="num">2.25%</td><td class="num">0.32%</td></tr><tr><td>Fewer than 5 genes detected</td><td class="num">1.75%</td><td class="num">0.20%</td></tr><tr><td>Cell area &lt; 15 µm²</td><td class="num">0.23%</td><td class="num">0.18%</td></tr><tr><td>Cell area &gt; 1500 µm²</td><td class="num">0.00%</td><td class="num">0.00%</td></tr><tr><td>Control fraction &gt; 5%</td><td class="num">0.07%</td><td class="num">0.03%</td></tr><tr><td>Nucleus larger than its cell</td><td class="num">0.00%</td><td class="num">0.00%</td></tr></tbody></table></div>
+
+<p>The criteria are deliberately permissive. On a targeted panel the dominant failure mode is
+not a noisy cell but an <em>empty</em> one — a segmentation mask with no transcripts in it
+— and a conservative depth floor removes those without discarding genuinely small immune
+cells, which is the error that quietly deletes the most interesting population in a tumour
+section.</p>
+
+<h2>Per-cell distributions</h2>
+
+<figure>
+<img src="assets/figures/fig01_qc_panel.png" alt="Six-panel figure of per-cell QC distributions for both replicates" loading="lazy">
+<figcaption><b>Per-cell quality across both replicates.</b> (a) Depth is near-identical between sections over four orders of magnitude; the knee at the right edge is the empty-mask population the depth filter is designed to remove. (b, c) Transcript and gene distributions are unimodal above the filter, with the spike at one transcript per cell clearly separated from the main mode. (d) Control-feature background concentrates almost entirely in shallow cells — the diagonal band is the arithmetic floor of a single control count, not a gradient of contamination. (e) Nucleus-to-cell area ratio stays below one everywhere, so segmentation expansion never produced an impossible cell. (f) Which criterion actually removes cells, ranked.</figcaption>
+</figure>
+
+<h2>Run-level summary</h2>
+
+<p>Run metrics are recomputed from the count matrix rather than copied from the vendor summary,
+with the vendor value carried alongside so the two can be compared. The negative-control rate
+is the single most informative number on this table: it is the fraction of detected signal that
+is known to be false, and it bounds how much of any weak biological effect could be background.</p>
+
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th class="num">Rep1</th><th class="num">Rep2</th></tr></thead><tbody><tr><td>Segmented cells</td><td class="num">167,780</td><td class="num">118,752</td></tr><tr><td>Median transcripts / cell</td><td class="num">164</td><td class="num">164</td></tr><tr><td>Median genes / cell</td><td class="num">64</td><td class="num">65</td></tr><tr><td>Median cell area (µm²)</td><td class="num">140.3</td><td class="num">148.7</td></tr><tr><td>Negative-control probe rate</td><td class="num">0.00088</td><td class="num">0.00038</td></tr><tr><td>Negative-control codeword rate</td><td class="num">0.000066</td><td class="num">0.000059</td></tr><tr><td>Transcripts assigned to a cell (vendor)</td><td class="num">0.932</td><td class="num">0.911</td></tr><tr><td>Cells passing all per-cell criteria</td><td class="num">0.9755</td><td class="num">0.9949</td></tr><tr><td><b>Run verdict</b></td><td class="num"><b><span class="pass">PASS</span></b></td><td class="num"><b><span class="pass">PASS</span></b></td></tr></tbody></table></div>
+
+<div class="note"><span class="label">Note</span><p>Both runs pass every criterion. Negative-control probes account for
+0.088% and 0.038%
+of panel signal respectively — roughly one false transcript in a thousand — and
+negative-control <em>codewords</em>, which report decoding error rather than probe
+non-specificity, are an order of magnitude rarer still. The cell yield differs substantially
+between sections (167,780 versus 118,752), but this
+tracks the amount of tissue on the slide rather than any difference in run quality: median depth
+and median panel breadth per cell are identical.</p></div>
+
+<h2>Is any defect regional?</h2>
+
+<p>A run-level average can hide a bad corner. The test here is spatial autocorrelation: bin the
+section into 100&nbsp;µm squares, compute Moran's I for each
+technical metric on the queen-contiguity grid, and ask whether the metric clusters in space more
+than a random relabelling of the same bins would produce. A technical artefact — a defocused
+tile, a decoding dropout, a fluidics streak — produces strong, blocky autocorrelation aligned
+to instrument geometry. Tissue produces strong autocorrelation too, but shaped like tissue.</p>
+
+<div class="table-wrap"><table><thead><tr><th>Metric</th><th class="num">Moran&#x27;s I, Rep1</th><th class="num">Moran&#x27;s I, Rep2</th></tr></thead><tbody><tr><td>Cell density (cells/mm²)</td><td class="num">0.785</td><td class="num">0.824</td></tr><tr><td>Median transcripts per cell</td><td class="num">0.572</td><td class="num">0.456</td></tr><tr><td>Fraction of cells passing QC</td><td class="num">0.675</td><td class="num">0.214</td></tr><tr><td>Median control-feature fraction</td><td class="num">0.355</td><td class="num">0.009</td></tr></tbody></table></div>
+
+<figure>
+<img src="assets/figures/fig02_spatial_qc.png" alt="Spatial maps of transcript depth, control background and cell density for both replicates" loading="lazy">
+<figcaption><b>Technical metrics mapped back onto the section.</b> Depth (left) and cell density (right) are strongly structured, but the structure is ductal and stromal architecture: the dense, transcript-rich regions are epithelial nests with sharp, curved boundaries, not rectangular fields of view. Control-feature background (centre) is close to flat. Colour scales are shared between rows so the two sections are directly comparable.</figcaption>
+</figure>
+
+<p>Cell density is the most strongly autocorrelated metric (I&nbsp;=&nbsp;0.82),
+which is exactly what a tissue with dense epithelial nests and sparse stroma should produce.
+Control-feature background is the least structured (I&nbsp;=&nbsp;0.01 in
+Rep2) — the signature of background that is uniform across the slide. Crucially, none of
+the maps show rectangular blocks or straight-edged discontinuities. The depth structure follows
+curved tissue boundaries, so the correct action is to account for cell type when interpreting
+depth, not to mask a region or re-run the slide.</p>
+
+<div class="caveat"><span class="label">Limitation</span><p>Moran's I on a binned grid detects regional structure; it does not attribute it.
+A defect perfectly confounded with a tissue boundary would be indistinguishable from biology by
+this test alone. Registering the DAPI image against an H&amp;E section and inspecting the
+flagged bins directly is the next check, and it needs the morphology image that is not part of
+this public bundle.</p></div>
+
+<h2>Do the two replicates agree?</h2>
+
+<p>This is the arm that a single-section analysis cannot have. Two serial sections of the same
+block were processed as independent runs, so any difference between them is technical by
+construction — sectioning, hybridisation, imaging, decoding — and sets a floor on the
+effect size worth believing from one section.</p>
+
+<figure>
+<img src="assets/figures/fig03_replicate_concordance.png" alt="Scatter and MA plots comparing pseudobulk expression between the two replicates" loading="lazy">
+<figcaption><b>Cross-replicate concordance of panel-level expression.</b> (a) Pseudobulk CPM for all 313 panel genes, r&nbsp;=&nbsp;0.992 on log₁₀ values. (b) The same data as an MA plot: only 7 genes exceed a two-fold difference, and they are scattered across the abundance range rather than concentrated at low expression, which is what a depth or sensitivity difference would produce.</figcaption>
+</figure>
+
+<p>Agreement is high (r&nbsp;=&nbsp;0.992,
+ρ&nbsp;=&nbsp;0.993), and the
+7 genes that do differ by more than two-fold are
+informative: the largest discordances are in <i>LEP</i>, <i>ADIPOQ</i>, <i>MYBPC1</i> and <i>GZMB</i>. These are markers of
+adipose and skeletal-muscle tissue — structures that are present in one section plane and
+absent from the other. That is a sectioning difference, not a run-quality difference, and it is
+the clearest possible demonstration of why a fold-change from a single section should not be
+read as biology without a replicate to anchor it.</p>
+
+<div class="note"><span class="label">Note</span><p><b>The practical output of this stage</b> is a number to calibrate against: on this
+tissue, a two-fold pseudobulk difference between sections of the <em>same block</em> is
+achievable from sectioning alone. Any cross-sample claim smaller than that needs more than one
+section per sample to support it.</p></div>
+
+<div class="pager"><a href="index.html"><span class="dir">Previous</span>Overview</a><a href="celltypes.html" style="text-align:right"><span class="dir">Next</span>2 · Cell typing</a></div>
+</main>
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="author-line">Built by <a href="https://ashokdwivedi.com">Ashok Dwivedi</a> —
+       <a href="https://ashokdwivedi.com">ashokdwivedi.com</a></p>
+    <p>Source, data-download script and unit tests:
+       <a href="https://github.com/ashokdwivedi/xenium-breast-tme">github.com/ashokdwivedi/xenium-breast-tme</a>. Released under the MIT licence.</p>
+    <p>Data are public: 10x Genomics Xenium In Situ FFPE Human Breast Cancer (Janesick et al. 2023)
+       and the breast-cancer scRNA-seq atlas of Wu et al. 2021 (GEO GSE176078). This site is an
+       independent methods demonstration and is not affiliated with or endorsed by 10x Genomics.</p>
+  </div>
+</footer>
+</body>
+</html>
